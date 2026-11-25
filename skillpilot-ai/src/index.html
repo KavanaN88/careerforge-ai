@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkillPilot AI — Prove Your Skills. Build Your Career. (dev/modular build)</title>
+<meta name="description" content="SkillPilot AI analyzes your skills, resume, GitHub projects and technical performance to build an evidence-based Career Digital Twin." />
+
+<!--
+  This is the MODULAR source version, split into files for readability and editing.
+  It must be served over http:// (e.g. `npx serve .` or `python3 -m http.server`),
+  not opened directly as a file:// URL, because it fetches each source file with fetch().
+
+  For a version that works by double-clicking with no server, use the bundled
+  /index.html at the project root instead — it's generated from these same files
+  (run build.sh here to regenerate it after editing).
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../vendor/tailwind.css">
+
+<script src="../vendor/react.production.min.js"></script>
+<script src="../vendor/react-dom.production.min.js"></script>
+<script src="../vendor/babel.min.js"></script>
+
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="bg-navy text-ink font-body antialiased">
+  <div id="root"></div>
+  <div id="boot-error" style="display:none;position:fixed;inset:0;background:#0B1020;color:#F8FAFC;font-family:monospace;padding:32px;white-space:pre-wrap;overflow:auto;z-index:9999;"></div>
+
+  <script>
+    // Fetches each source file in order, concatenates it, then transforms the whole thing
+    // with Babel Standalone using the CLASSIC JSX runtime explicitly. We do this manually
+    // (instead of <script type="text/babel" src="...">) because some CDN Babel versions
+    // default to the "automatic" JSX runtime, which emits ES `import` statements that plain
+    // <script> tags cannot execute (you'll see "Cannot use import statement outside a module").
+    const FILES = [
+      "./data/mockData.js",
+      "./data/engine.js",
+      "./data/skillCatalog.js",
+      "./data/careerSkills.js",
+      "./data/careerRoles.js",
+      "./data/careerCatalog.js",
+      "./data/assessmentBank.js",
+      "./data/assessmentEngine.js",
+      "./data/interviewBank.js",
+      "./data/interviewEngine.js",
+      "./data/projectCatalog.js",
+      "./data/projectEngine.js",
+      "./data/api.js",
+      "./components/ui.js",
+      "./components/Landing.js",
+      "./components/Auth.js",
+      "./components/SkillPicker.js",
+      "./components/Onboarding.js",
+      "./components/CareerSelect.js",
+      "./components/Dashboard.js",
+      "./components/DigitalTwin.js",
+      "./components/GithubAnalyzer.js",
+      "./components/ResumeIntel.js",
+      "./components/JobAnalyzer.js",
+      "./components/Assessment.js",
+      "./components/Interview.js",
+      "./components/Projects.js",
+      "./components/Roadmap.js",
+      "./components/Progress.js",
+      "./components/Report.js",
+      "./components/ProfileSettings.js",
+      "./components/Assistant.js",
+      "./components/Shell.js",
+      "./app.js",
+    ];
+
+    function showBootError(title, detail) {
+      const el = document.getElementById("boot-error");
+      el.style.display = "block";
+      el.textContent = title + (detail ? ("\n\n" + detail) : "");
+    }
+
+    async function boot() {
+      const parts = await Promise.all(FILES.map(async (f) => {
+        const res = await fetch(f);
+        if (!res.ok) throw new Error(`Failed to fetch ${f}: ${res.status} ${res.statusText}`);
+        return `// ==== ${f} ====\n` + (await res.text());
+      }));
+      const source = parts.join("\n");
+      const compiled = Babel.transform(source, {
+        presets: [["react", { runtime: "classic" }]],
+        filename: "skillpilot.jsx",
+      }).code;
+      (0, eval)(compiled);
+    }
+
+    boot().catch((err) => {
+      console.error(err);
+      showBootError(
+        "SkillPilot AI failed to start.",
+        "This dev build fetches each source file over http:// — make sure you're running a local " +
+        "static server from this src/ folder (e.g. `npx serve .` or `python3 -m http.server`) and " +
+        "opening the printed http://localhost URL, not double-clicking this file.\n\n" +
+        "If you ARE serving it and still see this, check your network/firewall/ad-blocker for " +
+        "anything blocking unpkg.com, cdn.tailwindcss.com, or fonts.googleapis.com.\n\n" +
+        "Technical detail: " + (err && err.message ? err.message : err)
+      );
+    });
+  </script>
+</body>
+</html>
